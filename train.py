@@ -42,8 +42,3 @@ if __name__ == "__main__":
                                  N_EPOCHS,
                                  validation_data=([test_stories, test_queries], test_answers),
                                  callbacks=[cp_callback])
-
-    memory_network.save(f"weights/{d_name}.h5")
-    print("saved!")
-
-    checkpoint_dir = os.path.dirname(CHECKPOINT_PATH)
