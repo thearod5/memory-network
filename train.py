@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     memory_network = create_memory_network(config)
     if len(os.listdir(CHECKPOINT_DIR)) >= 1:
-        memory_network.load_weights(CHECKPOINT_PATH)
+        memory_network = tf.keras.models.load_model(CHECKPOINT_DIR)
 
     cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=CHECKPOINT_DIR,
                                                      save_weights_only=False,
