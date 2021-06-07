@@ -1,0 +1,11 @@
+data/conversation/**.txt
+data/conversation/test.csv
+data/conversation/train.csv
+data/conversation/conversations.csv
+data/conversation/.create
+data/en-10k/**
+.idea
+/**/.ipynb_checkpoints
+/**/__pycache__
+venv
+/**/.DS_Store
