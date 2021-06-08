@@ -77,9 +77,11 @@ def create_sequential_decoder(decoder_input, config: MemoryNetworkConfig):
 
 def create_sequential_decoder_with_attention(decoder_input, config: MemoryNetworkConfig):
     decoder = RepeatVector(config.answer_max_length)(decoder_input)
-    decoder = LSTM(config.n_lstm_nodes, return_sequences=True)(decoder)
+    for i in range(config.n_decoder_lstm):
+        decoder = LSTM(config.n_lstm_nodes, return_sequences=True)(decoder)
     decoder = Attention()(decoder)
     decoder = BatchNormalization(momentum=config.momentum)(decoder)
+    decoder = Dropout(config.dropout_rate)(decoder)
     decoder = TimeDistributed(Dense(config.vocab_size, activation='softmax'))(decoder)
     return decoder
 
@@ -99,3 +101,30 @@ def create_memory_network(config: MemoryNetworkConfig):
                   metrics=['accuracy'])
 
     return model
+
+
+def create_memory_network_with_attention(config: MemoryNetworkConfig):
+    context_input = Input((config.story_max_length,))
+    query_input = Input((config.query_max_length,))
+
+    answer = create_memory_network_encoder(context_input,
+                                           query_input,
+                                           config)
+    decoder = create_sequential_decoder_with_attention(answer, config)
+
+    model = Model([context_input, query_input], decoder)
+    model.compile(optimizer='adam',
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+
+    return model
+
+
+memory_map = {
+    "mn": create_memory_network,
+    "mn-attention": create_memory_network_with_attention
+}
+
+
+def create_model(m_name: str, config: MemoryNetworkConfig):
+    return memory_map[m_name](config)
