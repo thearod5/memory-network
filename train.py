@@ -27,7 +27,7 @@ config.n_encoder_lstm = 5
 
 if __name__ == "__main__":
     d_name = "sample_conversation"
-    m_name = "mn-attention"
+    m_name = "encoder-decoder"
     loader = DataLoader(d_name)
     train_data, test_data = loader.get_vectorized_data(config)
     train_stories, train_queries, train_answers = train_data
