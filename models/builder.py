@@ -120,9 +120,39 @@ def create_memory_network_with_attention(config: MemoryNetworkConfig):
     return model
 
 
+def create_encoder_decoder(config: MemoryNetworkConfig):
+    context_input = Input((config.story_max_length,))
+    query_input = Input((config.query_max_length,))
+
+    context_embedding = create_embedding(input_dim=config.vocab_size,
+                                         output_dim=config.embedding_size,
+                                         dropout_rate=config.dropout_rate,
+                                         momentum=config.momentum)(context_input)
+
+    query_embedding = create_embedding(input_dim=config.vocab_size,
+                                       output_dim=config.embedding_size,
+                                       dropout_rate=config.dropout_rate,
+                                       momentum=config.momentum)(query_input)
+
+    encoder = concatenate([context_embedding, query_embedding])
+    for i in range(config.n_encoder_lstm - 1):
+        encoder = LSTM(config.n_lstm_nodes, return_sequences=True)(encoder)
+    encoder = LSTM(config.n_lstm_nodes)(encoder)
+    encoder = Dropout(config.dropout_rate)(encoder)
+    decoder = create_sequential_decoder_with_attention(encoder, config)
+
+    model = Model([context_input, query_input], decoder)
+    model.compile(optimizer='adam',
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+
+    return model
+
+
 memory_map = {
     "mn": create_memory_network,
-    "mn-attention": create_memory_network_with_attention
+    "mn-attention": create_memory_network_with_attention,
+    "encoder-decoder": create_encoder_decoder
 }
 
 
